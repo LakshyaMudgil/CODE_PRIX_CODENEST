@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#080b19">
+<meta name="description" content="CodeNest Grand Prix — a browser typing race. Out-type three AI rivals to the finish line.">
+<title>CodeNest Grand Prix</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e142e'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%234debff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="header">
+    <div class="header-left">
+      <span class="header-logo">CODENEST</span>
+      <span class="header-sub">GRAND PRIX</span>
+    </div>
+    <div class="header-mid">SECTOR 01 &nbsp;/&nbsp; NIGHT SHIFT</div>
+    <div class="header-right">
+      <button class="mute-btn" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute sound effects" title="Toggle sound effects"><span aria-hidden="true">🔊</span><span class="mute-label">SOUND</span></button>
+      <div class="header-pos" id="posValue">1ST</div>
+      <div class="header-pos-label">POSITION</div>
+    </div>
+  </header>
+
+  <div class="track-wrap" id="trackWrap">
+    <canvas id="track"></canvas>
+
+    <div class="overlay show" id="menuOverlay">
+      <div class="overlay-card">
+        <h1 class="hero">TYPE TO THRIVE</h1>
+        <p class="hero-sub">CODENEST GRAND PRIX</p>
+        <div class="card" style="--accent:var(--pink)">
+          <div class="card-title">HOW TO RACE</div>
+          <ul class="howto-list">
+            <li><span class="diamond">&#9670;</span> Match each glowing character to build speed.</li>
+            <li><span class="diamond">&#9670;</span> Every 5 clean keys fills your nitro flow.</li>
+            <li><span class="diamond">&#9670;</span> Mistakes break your streak — Backspace fixes your line.</li>
+          </ul>
+        </div>
+        <div class="setup-grid" aria-label="Race setup">
+          <div class="setup-group">
+            <span class="setup-label">RACE MODE</span>
+            <div class="segmented" id="modeSeg" role="group" aria-label="Race mode">
+              <button class="seg-btn" type="button" data-mode="prose" aria-pressed="true">Aa <span>Prose</span></button>
+              <button class="seg-btn" type="button" data-mode="code" aria-pressed="false">&lt;/&gt; <span>Code</span></button>
+            </div>
+          </div>
+          <div class="setup-group">
+            <span class="setup-label">DIFFICULTY</span>
+            <div class="segmented" id="diffSeg" role="group" aria-label="Difficulty">
+              <button class="seg-btn" type="button" data-diff="short" aria-pressed="false">Short</button>
+              <button class="seg-btn active" type="button" data-diff="medium" aria-pressed="true">Medium</button>
+              <button class="seg-btn" type="button" data-diff="long" aria-pressed="false">Long</button>
+            </div>
+          </div>
+        </div>
+        <button class="cta-btn" id="startBtn" type="button">Start Your Engine</button>
+        <p class="cta-hint">or press <strong>Space</strong></p>
+        <p class="best-line" id="bestLine"></p>
+      </div>
+    </div>
+
+    <div class="overlay" id="countdownOverlay">
+      <div class="overlay-card">
+        <div class="countdown-num" id="countdownNum">3</div>
+        <div class="lights" id="lights">
+          <div class="light" data-i="0"></div>
+          <div class="light" data-i="1"></div>
+          <div class="light" data-i="2"></div>
+        </div>
+      </div>
+    </div>
+
+  <div class="overlay" id="finishOverlay">
+      <div class="overlay-card">
+        <h1 class="finish-title" id="finishTitle">PHOTO FINISH</h1>
+        <p class="finish-sub" id="finishSub">YOU TOOK 1ST</p>
+        <div class="card" style="--accent:var(--gold)">
+          <div class="card-title">RACE TELEMETRY</div>
+          <div class="tele-grid">
+            <div><span>FINISH TIME</span><strong id="teleTime">0.00s</strong></div>
+            <div><span>TOP SPEED</span><strong id="teleWpm">0 WPM</strong></div>
+            <div><span>PRECISION</span><strong id="telePrec">100%</strong></div>
+            <div><span>BEST STREAK</span><strong id="teleStreak">&times;0</strong></div>
+          </div>
+        </div>
+        <button class="cta-btn" id="againBtn" type="button">Race Again</button>
+        <p class="cta-hint">or press <strong>Space</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="overlay-card compact-card">
+      <h1 class="finish-title" id="pauseTitle">PAUSE THE RACE?</h1>
+      <p class="finish-sub">YOUR LAP IS WAITING AT THE PIT WALL</p>
+      <div class="confirm-actions">
+        <button class="cta-btn" id="resumeBtn" type="button">Keep Racing</button>
+        <button class="secondary-btn" id="quitBtn" type="button">Quit to Garage</button>
+      </div>
+      <p class="cta-hint">or press <strong>Escape</strong> to resume</p>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <div class="dash-left">
+      <div class="tele-cards">
+        <div class="tcard" style="--accent:var(--cyan)">
+          <div class="t-label">SPEED</div>
+          <div class="t-value" id="statWpm">0<span class="t-suffix">WPM</span></div>
+        </div>
+        <div class="tcard" style="--accent:var(--lime)">
+          <div class="t-label">PRECISION</div>
+          <div class="t-value" id="statAcc">100<span class="t-suffix">%</span></div>
+        </div>
+        <div class="tcard" style="--accent:var(--pink)">
+          <div class="t-label">STREAK</div>
+          <div class="t-value" id="statStreak">&times;0<span class="t-suffix">COMBO</span></div>
+        </div>
+      </div>
+      <div class="nitro-box">
+        <div class="nitro-label">NITRO FLOW</div>
+        <div class="nitro-track"><div class="nitro-fill" id="nitroFill"></div></div>
+      </div>
+    </div>
+
+    <div class="type-panel" id="typePanel">
+      <div class="type-label">LIVE INPUT &mdash; KEEP THE CURSOR MOVING</div>
+      <div class="type-text" id="typeText" tabindex="0" aria-label="Typing area. Click and type the highlighted text."></div>
+      <div class="type-progress"><div class="type-progress-fill" id="typeProgressFill"></div></div>
+      <div class="ticker" id="ticker">TYPE THE HIGHLIGHTED CHARACTER TO DRIVE</div>
+    </div>
+  </div>
+</div>
+
+<p class="sr-only" id="raceInstructions">Select a mode and difficulty, then type the highlighted text exactly. Escape pauses an active race.</p>
+<div class="sr-only" id="ariaLive" role="status" aria-live="polite" aria-atomic="true"></div>
+<textarea class="hidden-input" id="hiddenInput" rows="1" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Race typing input" aria-describedby="raceInstructions" tabindex="-1"></textarea>
+
+<script src="script.js" defer></script>
+</body>
+</html>
